@@ -162,17 +162,68 @@ provider "azurerm" {
 
 ---
 
-## Terraform Init
+# 🚀 Terraform Core Commands – Quick Reference
+
+## 🛠️ `terraform init` — *Initialize Terraform Working Directory*
+
+> Prepares your project for Terraform use by downloading required provider plugins and setting up the backend.
+
+- Initializes `.terraform` directory
+- Downloads the provider specified in `required_providers`
+- Sets up remote backend (if configured)
+- Creates `.terraform.lock.hcl` for version consistency
+
+📌 Run this command **first** before `plan` or `apply`.
+
+---
+
+## 🧾 `terraform plan` — *Preview the Changes*
+
+> Displays what Terraform **would do** (create, update, or delete resources) without applying any changes.
+
+- Compares your `.tf` configuration with the current infrastructure and state
+- Helps verify changes before applying
+- Does **not** modify any resources
+
+📌 Think of it as a **dry run** or **pre-check**.
+
+---
+
+## 🚀 `terraform apply` — *Apply the Changes*
+
+> Executes the Terraform plan and **provisions** infrastructure described in your `.tf` files.
+
+- Actually creates, modifies, or deletes resources
+- Prompts for confirmation unless `-auto-approve` is used
+- Updates the `terraform.tfstate` file after changes
+
+📌 Think of it as **“make the changes live”**.
+
+---
+
+## 💣 `terraform destroy` — *Tear Down Everything*
+
+> Destroys all resources **managed by Terraform** in the current working directory.
+
+- Prompts for confirmation before deleting resources
+- Removes all infrastructure defined in your Terraform project
+- Useful for **decommissioning environments**
+
+📌 Think of it as **“undo everything Terraform applied”**.
+
+---
+
+## 🔁 Common Terraform Workflow
+
+```bash
+terraform init       # Initialize providers & backend
+terraform plan       # Preview what will change
+terraform apply      # Apply those changes to the cloud
+terraform destroy    # Delete everything (use with care!)
 
 
-terraform init
-```
 
-- Prepares the working directory
-- Downloads provider plugins
-- Initializes backend if configured
-- Plugins stored in `.terraform/` folder  
-  _(e.g., `C:\TF_Lab01\.terraform\`)_
+
 
 ---
 
