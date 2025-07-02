@@ -1,5 +1,5 @@
 
-# Session 06: Terraform
+# Session 06: Terraform 01
 
 ## What is Terraform?
 
