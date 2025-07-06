@@ -1,136 +1,95 @@
 # Session 07 – Terraform 02
 
-## 📌 Backend Process – Resource Creation via Azure Portal vs Terraform
+# 📌 Backend Process – Resource Creation via Azure Portal vs Terraform
 
-### 🔷 Azure Portal Flow
+This document explains how Azure resources (like a Resource Group) are created using two methods:
 
-┌──────────────────────────────┐
-│ 1. User Opens Azure Portal │
-│ https://portal.azure.com │
-└────────────┬────────────────┘
-┌──────────────────────────────┐
-│ 1. User Opens Azure Portal   │
-│   https://portal.azure.com   │
-└────────────┬────────────────┘
-▼
-┌──────────────────────────────┐
-│ 2. User Logs In │
-│ - Auth via Azure Entra │
-│ - Token issued │
-└────────────┬────────────────┘
-▼
-┌──────────────────────────────┐
-│ 3. User fills form: │
-│ - RG Name: my-rg │
-│ - Location: East US │
-└────────────┬────────────────┘
-▼
-┌──────────────────────────────┐
-│ 4. Clicks "Create" Button │
-└────────────┬────────────────┘
-▼
-┌──────────────────────────────┐
-│ 5. Portal Sends HTTPS PUT │
-│ REST API Request to ARM │
-│ - Includes token │
-│ - URL: https://management.│
-│ azure.com/... │
-└────────────┬────────────────┘
-▼
-┌──────────────────────────────┐
-│ 6. ARM Receives Request │
-│ - Validates token │
-│ - Checks RBAC │
-│ - Validates payload │
-└────────────┬────────────────┘
-▼
-┌──────────────────────────────┐
-│ 7. ARM Creates Resource Group│
-│ - Stores metadata │
-└────────────┬────────────────┘
-▼
-┌──────────────────────────────┐
-│ 8. ARM Sends Response │
-│ - Status: Created │
-│ - Resource ID, Name, Loc │
-└────────────┬────────────────┘
-▼
-┌──────────────────────────────┐
-│ 9. Portal Refreshes View │
-│ - my-rg now visible │
-└──────────────────────────────┘
+- ✅ Azure Portal (GUI)
+- ⚙️ Terraform (IaC)
 
 ---
 
-### 🔷 Terraform Flow
+## 🔷 Azure Portal Resource Creation Flow
 
-┌─────────────────────────────────────────────────────┐
-│ 1. User Runs terraform apply │
-│ - .tf defines azurerm_resource_group │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│ 2. Terraform Loads azurerm Provider │
-│ - Reads provider block │
-│ - Initializes plugin │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│ 3. Provider Authenticates to Azure │
-│ - CLI/SPN/Env/Managed Identity │
-│ - Gets access token from Azure AD │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│ 4. Provider Translates HCL to REST API │
-│ - Prepares HTTPS PUT request │
-│ - Adds access token in headers │
-│ - Payload includes RG name + location │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│ 5. Azure Resource Manager (ARM) Receives │
-│ - Validates token with Azure AD │
-│ - Checks RBAC & payload structure │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│ 6. ARM Provisions Resource Group │
-│ - my-rg created │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│ 7. ARM Sends Response │
-│ - HTTP 201 Created │
-│ - Returns ID, name, location │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│ 8. Terraform Receives API Response │
-│ - Verifies success │
-│ - Marks resource as provisioned │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│ 9. Terraform Displays Output │
-│ - Shows “Apply complete!” │
-│ - Lists created resources │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│10. Resource Group Visible in Azure Portal │
-│ - my-rg shown in East US │
-└────────────────────────────┬────────────────────────┘
-▼
-┌─────────────────────────────────────────────────────┐
-│11. Terraform Updates terraform.tfstate │
-│ - Saves ID, name, location │
-│ - Used in future plan/apply/destroy │
-│ - Stored locally or remote backend │
-└─────────────────────────────────────────────────────┘
+```text
+1️⃣  User opens Azure Portal
+     → https://portal.azure.com
 
+2️⃣  User logs in
+     → Auth via Azure Entra (Azure AD)
+     → Access token issued
 
----
+3️⃣  User fills the form
+     → Resource Group Name: my-rg
+     → Location: East US
+
+4️⃣  User clicks "Create"
+
+5️⃣  Portal sends HTTPS PUT request to ARM
+     → Includes access token
+     → REST API: https://management.azure.com/...
+
+6️⃣  Azure Resource Manager (ARM) receives request
+     → Validates token
+     → Checks RBAC (Permissions)
+     → Validates request payload
+
+7️⃣  ARM creates the Resource Group
+     → Stores metadata in Azure
+
+8️⃣  ARM sends success response
+     → Status: 201 Created
+     → Returns ID, Name, and Location
+
+9️⃣  Portal refreshes view
+     → my-rg now visible in Azure Portal
+
+⚙️ Terraform Resource Creation Flow
+
+1️⃣  User runs `terraform apply`
+     → .tf file defines `azurerm_resource_group`
+
+2️⃣  Terraform loads Azure provider
+     → Reads provider block
+     → Initializes plugin
+
+3️⃣  Provider authenticates to Azure
+     → Uses CLI / SPN / Env vars / Managed Identity
+     → Gets access token from Azure AD
+
+4️⃣  Provider converts HCL to REST API call
+     → Prepares HTTPS PUT request
+     → Adds token to headers
+     → Payload includes RG name and location
+
+5️⃣  ARM receives the request
+     → Validates token and RBAC
+     → Verifies payload structure
+
+6️⃣  ARM provisions the Resource Group
+     → my-rg is created
+
+7️⃣  ARM sends response
+     → HTTP 201 Created
+     → Includes resource ID, name, and location
+
+8️⃣  Terraform receives response
+     → Confirms success
+     → Marks resource as created
+
+9️⃣  Terraform shows output
+     → "Apply complete!" message
+     → Lists created resources
+
+🔟  Resource group appears in Azure Portal
+     → my-rg shown in East US region
+
+1️⃣1️⃣  Terraform updates `terraform.tfstate`
+     → Saves resource ID, name, location
+     → Used for future plan/apply/destroy
+     → Stored locally or in remote backend
+✅ Tip:
+Terraform and the Azure Portal both use the same backend — the Azure Resource Manager (ARM) — through Azure REST APIs. The only difference is how the request is generated: manually (Portal) vs. automatically (Terraform).
 
 ## 🔍 Azure REST API
 
