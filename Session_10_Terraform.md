@@ -210,3 +210,5 @@ Copy
 Edit
 depends_on = [ azurerm_windows_virtual_machine.winvm ]
 This ensures that the NIC+NSG binding occurs only after the VM provisioning completes, avoiding potential race conditions.
+
+✅ Best Practice: Keep secrets like passwords out of source code. Use environment variables, terraform.tfvars, or secure vaults (like Azure Key Vault) for production deployments
