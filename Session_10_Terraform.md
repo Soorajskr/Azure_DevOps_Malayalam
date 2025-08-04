@@ -1,7 +1,20 @@
-🚀 Windows Virtual Machine Creation on Azure with Terraform
-This guide demonstrates how to deploy a Windows Virtual Machine in Azure using Terraform. It includes all necessary Azure resources such as Resource Group, Virtual Network, Subnet, Network Security Group, Public IP, and Network Interface.
+# 🚀 Windows Virtual Machine Creation on Azure with Terraform
 
-📁 Variables
+This guide demonstrates how to deploy a Windows Virtual Machine in Azure using Terraform.  
+It includes all necessary Azure resources such as:
+
+- Resource Group  
+- Virtual Network  
+- Subnet  
+- Network Security Group  
+- Public IP  
+- Network Interface  
+- Virtual Machine  
+
+---
+
+## 📁 Variables
+
 
 variable "azurerm_resource_group" {
   type    = string
@@ -28,13 +41,13 @@ provider "azurerm" {
   subscription_id = "44b09a79-b194-41d1-b9ef-b567ed97a565"
 }
 🏗️ Azure Resources
-Resource Group
+✅ Resource Group
 
 resource "azurerm_resource_group" "rg" {
   name     = var.azurerm_resource_group
   location = var.location
 }
-Virtual Network
+🌐 Virtual Network
 
 resource "azurerm_virtual_network" "vnet" {
   name                = "winvm-vnet"
@@ -42,7 +55,7 @@ resource "azurerm_virtual_network" "vnet" {
   location            = var.location
   resource_group_name = var.azurerm_resource_group
 }
-Subnet
+📶 Subnet
 
 resource "azurerm_subnet" "subnet" {
   name                 = "winvm-subnet"
@@ -50,7 +63,7 @@ resource "azurerm_subnet" "subnet" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
 }
-Network Security Group (NSG)
+🔐 Network Security Group (NSG)
 
 resource "azurerm_network_security_group" "nsg" {
   name                = "winvm-nsg"
@@ -69,7 +82,7 @@ resource "azurerm_network_security_group" "nsg" {
     destination_address_prefix = "*"
   }
 }
-Public IP Address
+🌐 Public IP Address
 
 resource "azurerm_public_ip" "public_ip" {
   name                = "winvm-publicip"
@@ -78,7 +91,7 @@ resource "azurerm_public_ip" "public_ip" {
   allocation_method   = "Dynamic"
   sku                 = "Basic"
 }
-Network Interface
+🧷 Network Interface
 
 resource "azurerm_network_interface" "nic" {
   name                = "winvm-nic"
@@ -92,7 +105,7 @@ resource "azurerm_network_interface" "nic" {
     public_ip_address_id          = azurerm_public_ip.public_ip.id
   }
 }
-NSG Association with NIC
+🔗 NSG Association with NIC
 
 resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
   network_interface_id      = azurerm_network_interface.nic.id
@@ -100,7 +113,7 @@ resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
 
   depends_on = [ azurerm_windows_virtual_machine.winvm ] # 👈 manual deep dependency
 }
-Windows Virtual Machine
+💻 Windows Virtual Machine
 
 resource "azurerm_windows_virtual_machine" "winvm" {
   name                  = "winvm01"
@@ -109,7 +122,7 @@ resource "azurerm_windows_virtual_machine" "winvm" {
   network_interface_ids = [azurerm_network_interface.nic.id]
   size                  = "Standard_DS1_v2"
   admin_username        = "azureuser"
-  admin_password        = "************"  
+  admin_password        = "************"  # 👈 masked for GitHub-safe sharing
 
   os_disk {
     caching              = "ReadWrite"
@@ -141,7 +154,7 @@ output "admin_username" {
 
 output "admin_password" {
   description = "The admin password for the virtual machine"
-  value       = "************"  
+  value       = "************"
   sensitive   = true
 }
 
@@ -150,22 +163,23 @@ output "public_ip_address" {
   value       = azurerm_public_ip.public_ip.ip_address
 }
 📌 How to View Outputs
-After applying the configuration, use the following commands to get output values:
+After applying the configuration, run:
+
 
 terraform output
-Or for specific values:
+Or view individual values:
+
 
 terraform output vm_name
 terraform output admin_username
 terraform output admin_password
 terraform output public_ip_address
 🔗 depends_on Explanation
-The depends_on argument is used to manually enforce resource creation order when Terraform's dependency graph cannot infer it automatically.
+The depends_on argument is used to manually enforce resource creation order when Terraform cannot infer it automatically.
 
 🔍 Example Use Case
-To make sure the NSG is only associated after the VM is created, use:
+To ensure the NSG association only happens after the VM is fully created:
 
 
 depends_on = [ azurerm_windows_virtual_machine.winvm ]
-This ensures that the NIC + NSG binding happens only after the VM is fully provisioned — preventing potential race conditions.
-
+This prevents race conditions by ensuring that the NIC + NSG binding occurs after the VM provisioning completes.
