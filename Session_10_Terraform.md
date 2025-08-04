@@ -165,10 +165,8 @@ output "public_ip_address" {
 📌 How to View Outputs
 After applying the configuration, run:
 
-
 terraform output
 Or view individual values:
-
 
 terraform output vm_name
 terraform output admin_username
