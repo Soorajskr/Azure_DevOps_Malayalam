@@ -14,7 +14,7 @@ This guide demonstrates how to deploy a **Windows Virtual Machine** in **Azure**
 
 ## 📁 Variables
 
-```hcl
+
 variable "azurerm_resource_group" {
   type    = string
   default = "winvm-rg"
@@ -25,9 +25,7 @@ variable "location" {
   default = "East US"
 }
 ⚙️ Terraform Provider Configuration
-hcl
-Copy
-Edit
+
 terraform {
   required_providers {
     azurerm = {
@@ -45,17 +43,13 @@ provider "azurerm" {
 }
 🏗️ Azure Resources
 ✅ Resource Group
-h
-Copy
-Edit
+
 resource "azurerm_resource_group" "rg" {
   name     = var.azurerm_resource_group
   location = var.location
 }
 🌐 Virtual Network
-hcl
-Copy
-Edit
+
 resource "azurerm_virtual_network" "vnet" {
   name                = "winvm-vnet"
   address_space       = ["10.0.0.0/16"]
@@ -63,9 +57,7 @@ resource "azurerm_virtual_network" "vnet" {
   resource_group_name = var.azurerm_resource_group
 }
 📶 Subnet
-hcl
-Copy
-Edit
+
 resource "azurerm_subnet" "subnet" {
   name                 = "winvm-subnet"
   resource_group_name  = var.azurerm_resource_group
@@ -73,9 +65,7 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 🔐 Network Security Group (NSG)
-hcl
-Copy
-Edit
+
 resource "azurerm_network_security_group" "nsg" {
   name                = "winvm-nsg"
   location            = var.location
@@ -94,9 +84,7 @@ resource "azurerm_network_security_group" "nsg" {
   }
 }
 🌐 Public IP Address
-hcl
-Copy
-Edit
+
 resource "azurerm_public_ip" "public_ip" {
   name                = "winvm-publicip"
   location            = var.location
@@ -105,9 +93,7 @@ resource "azurerm_public_ip" "public_ip" {
   sku                 = "Basic"
 }
 🧷 Network Interface
-hcl
-Copy
-Edit
+
 resource "azurerm_network_interface" "nic" {
   name                = "winvm-nic"
   location            = var.location
@@ -121,9 +107,7 @@ resource "azurerm_network_interface" "nic" {
   }
 }
 🔗 NSG Association with NIC
-h
-Copy
-Edit
+
 resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
   network_interface_id      = azurerm_network_interface.nic.id
   network_security_group_id = azurerm_network_security_group.nsg.id
@@ -133,9 +117,7 @@ resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
   ]
 }
 💻 Windows Virtual Machine
-hcl
-Copy
-Edit
+
 resource "azurerm_windows_virtual_machine" "winvm" {
   name                  = "winvm01"
   location              = var.location
@@ -163,9 +145,7 @@ resource "azurerm_windows_virtual_machine" "winvm" {
   enable_automatic_updates  = true
 }
 📤 Terraform Outputs
-hcl
-Copy
-Edit
+
 output "vm_name" {
   description = "The name of the virtual machine"
   value       = azurerm_windows_virtual_machine.winvm.name
@@ -189,15 +169,9 @@ output "public_ip_address" {
 📌 How to View Outputs
 After applying the configuration, run:
 
-bash
-Copy
-Edit
 terraform output
 To view individual outputs:
 
-bash
-Copy
-Edit
 terraform output vm_name
 terraform output admin_username
 terraform output admin_password
@@ -205,10 +179,5 @@ terraform output public_ip_address
 🔗 depends_on Explanation
 Terraform automatically handles most resource dependencies. However, when explicit control is needed (like ensuring the NIC NSG association happens after the VM is created), use:
 
-h
-Copy
-Edit
 depends_on = [ azurerm_windows_virtual_machine.winvm ]
 This ensures that the NIC+NSG binding occurs only after the VM provisioning completes, avoiding potential race conditions.
-
-✅ Best Practice: Keep secrets like passwords out of source code. Use environment variables, terraform.tfvars, or secure vaults (like Azure Key Vault) for production deployments
